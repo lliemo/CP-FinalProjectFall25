@@ -1,10 +1,8 @@
-# My Final Pronject
+# My Final Pronject, 2025
 
 ## by Hallie Morton
 
-### Fall 2025
-
-#### Project Title and Description
+### Project Title and Description
 
 Option 1: Synthetic
 
@@ -18,7 +16,7 @@ Objective/Scope: to creates an entertaining game that uses and grows user musica
 
 OR
 
-Option 2: Midi Lisa
+Option 2: MIDI Lisa
 
 - an exhibition that paints/creates visuals in response to midi input
   -certain keys are different colors
@@ -26,12 +24,12 @@ Option 2: Midi Lisa
 
 Objective/Scope: to offer a new way to percieve music, provide inspiration, or just entertainment
 
-##### Anicipated user required resources
+### Anicipated user required resources
 
 -access to a browser
 -a midi keyboard
 
-##### Timeline:
+### Timeline:
 
 Oct 20th:
 -research procudures/requirements for code
