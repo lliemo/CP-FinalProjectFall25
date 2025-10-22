@@ -14,9 +14,10 @@ Starting Point:
 In game (Bx):
 
 - Simple string harmonies
+- Will eventually also have a melody
 
 User Input:
-_general controls from left hand_
+_general controls are controlled with left hand_
 
 - forward: suspended perfect fifth from root (ex. C4)
 - backward: suspended root (ex. F3)
@@ -25,7 +26,7 @@ _general controls from left hand_
 - float: suspended fourth from root (ex. Bb3)
   _you can jump while going forward/backward_
 
-\*extra actions are from right hand
+_extra actions are controlled with the right hand_
 
 - charge attack: arpeggio of triad (must be done at least 3 times to successfully attack)
 - attack #1: (any) triad in right hand
@@ -41,6 +42,17 @@ _general controls from left hand_
 
 -access to a browser
 -a midi keyboard
+
+### What do I need to do
+
+- code response to user MIDI input
+- make MIDI input synth sound nice (tone, ADSR)
+- create and integrate background music (loops)
+- find a template for graphics
+- create start menu that gives options to start, review controls, review objective
+- connect input to template so user input connects to graphics
+- create enemies in template
+- creat life system (3 hearts?, checkpoints?)
 
 ### Timeline:
 
