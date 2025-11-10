@@ -33,6 +33,39 @@ var myGameArea = {
   },
 };
 
+function updateGameArea() {
+  var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+  for (let i = 0; i < myObstacles.length; i += 1) {
+    if (myGamePiece.crashWith(myObstacles[i])) {
+      return;
+    }
+  }
+  myGameArea.clear();
+  myGameArea.frameNo += 1;
+  if (myGameArea.frameNo == 1 || everyinterval(150)) {
+    x = myGameArea.canvas.width;
+    minHeight = 20;
+    maxHeight = 200;
+    height = Math.floor(
+      Math.random() * (maxHeight - minHeight + 1) + minHeight
+    );
+    minGap = 50;
+    maxGap = 200;
+    gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+    myObstacles.push(new component(10, height, "green", x, 0));
+    myObstacles.push(
+      new component(10, x - height - gap, "green", x, height + gap)
+    );
+  }
+  for (let i = 0; i < myObstacles.length; i += 1) {
+    myObstacles[i].x += -1;
+    myObstacles[i].update();
+  }
+  myScore.text = "SCORE: " + myGameArea.frameNo;
+  myScore.update();
+  myGamePiece.newPos();
+  myGamePiece.update();
+}
 function component(width, height, color, x, y, type) {
   this.type = type;
   this.score = 0;
@@ -88,59 +121,26 @@ function component(width, height, color, x, y, type) {
     }
     return crash;
   };
-  function moveup() {
-    myGamePiece.speedY -= 1;
-  }
-
-  function movedown() {
-    myGamePiece.speedY += 1;
-  }
-
-  function moveleft() {
-    myGamePiece.speedX -= 1;
-  }
-
-  function moveright() {
-    myGamePiece.speedX += 1;
-  }
-  function stopMove() {
-    myGamePiece.speedX = 0;
-    myGamePiece.speedY = 0;
-  }
+}
+function moveUp() {
+  myGamePiece.speedY = -1;
 }
 
-function updateGameArea() {
-  var x, height, gap, minHeight, maxHeight, minGap, maxGap;
-  for (let i = 0; i < myObstacles.length; i += 1) {
-    if (myGamePiece.crashWith(myObstacles[i])) {
-      return;
-    }
-  }
-  myGameArea.clear();
-  myGameArea.frameNo += 1;
-  if (myGameArea.frameNo == 1 || everyinterval(150)) {
-    x = myGameArea.canvas.width;
-    minHeight = 20;
-    maxHeight = 200;
-    height = Math.floor(
-      Math.random() * (maxHeight - minHeight + 1) + minHeight
-    );
-    minGap = 50;
-    maxGap = 200;
-    gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-    myObstacles.push(new component(10, height, "green", x, 0));
-    myObstacles.push(
-      new component(10, x - height - gap, "green", x, height + gap)
-    );
-  }
-  for (let i = 0; i < myObstacles.length; i += 1) {
-    myObstacles[i].x += -1;
-    myObstacles[i].update();
-  }
-  myScore.text = "SCORE: " + myGameArea.frameNo;
-  myScore.update();
-  myGamePiece.newPos();
-  myGamePiece.update();
+function moveDown() {
+  myGamePiece.speedY = +1;
+}
+
+function moveLeft() {
+  myGamePiece.speedX -= 1;
+}
+
+function moveRight() {
+  myGamePiece.speedX += 1;
+}
+
+function stopMove() {
+  myGamePiece.speedX = 0;
+  myGamePiece.speedY = 0;
 }
 
 function everyinterval(n) {
@@ -150,9 +150,10 @@ function everyinterval(n) {
   return false;
 }
 
-//function accelerate(n) {
+// function accelerate(n) {
 //  myGamePiece.gravity = n;
-//}
+// }
+
 function midiMoves(n) {
   myGamePiece.y = n;
 }
@@ -199,5 +200,23 @@ myMIDIstuff.onNoteOff = (pitch, velocity, ch) => {
 };
 
 document.body.onload = startGame;
+
+//-----------------------------------------add event listeners-----------------------------------------
+
+let UpButton = document.querySelector("#UpButton");
+UpButton.onclick = moveUp;
+UpButton.onmouseup = stopMove;
+
+let DownButton = document.querySelector("#DownButton");
+DownButton.onclick = moveDown;
+DownButton.onmouseup = stopMove;
+
+let LeftButton = document.querySelector("#LeftButton");
+LeftButton.onclick = moveLeft;
+LeftButton.onmouseup = stopMove;
+
+let RightButton = document.querySelector("#RightButton");
+RightButton.onclick = moveRight;
+RightButton.onmouseup = stopMove;
 
 //-----------------------------------------connect MIDI to movement-----------------------------------------
