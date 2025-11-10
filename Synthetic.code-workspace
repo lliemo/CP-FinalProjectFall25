@@ -1,0 +1,11 @@
+{
+  "folders": [
+	{
+		"name": "MIDIModule",
+		"path": "../MIDIModule"
+	}
+],
+  "settings": {
+    "liveServer.settings.port": 5504
+  }
+}
