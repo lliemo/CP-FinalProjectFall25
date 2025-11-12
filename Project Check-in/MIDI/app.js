@@ -20,9 +20,11 @@ function startGame() {
   myGameArea.start();
 }
 
-function randomNote() {
-  let randomIndex = Math.floor(Math.random() * myNotes.length);
-  return myNotes[randomIndex];
+function randomIndex(min, max) {
+  //let randomIndex = Math.floor(Math.random()); // * myNotes);
+  min = Math.ceil(150);
+  max = Math.floor(300);
+  return Math.floor(Math.random() * (max - min + 1)) + min; //myNotes[randomIndex];
 }
 
 var myGameArea = {
@@ -49,25 +51,19 @@ function updateGameArea() {
   }
   myGameArea.clear();
   myGameArea.frameNo += 1;
-  if (myGameArea.frameNo == 1 || everyinterval(150)) {
+  if (myGameArea.frameNo == 1 || everyinterval(randomIndex())) {
     x = myGameArea.canvas.width;
     minHeight = 20;
     maxHeight = 200;
     height = Math.floor(
       Math.random() * (maxHeight - minHeight + 1) + minHeight
     );
-    minGap = 50;
+    minGap = 250;
     maxGap = 400;
     gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+    myObstacles.push(new component(50, 1400, "green", x, 0));
     myObstacles.push(
-      new component(
-        30,
-        1400,
-        "green",
-        x,
-        0,
-        (myNotes[randomNote()], 30, 50, "white")
-      )
+      new component("30px", "Consolas", "orange", x + 5, 250, "text")
     );
   }
   for (let i = 0; i < myObstacles.length; i += 1) {
@@ -90,6 +86,21 @@ function component(width, height, color, x, y, type) {
   this.speedY = 0;
   this.x = x;
   this.y = y;
+  this.myNotes = [
+    "A",
+    "A#",
+    "B",
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+  ];
+  this.text = this.myNotes[Math.floor(Math.random() * this.myNotes.length)];
   //this.gravity = 0;
   //this.gravitySpeed = 0;
   this.update = function () {
@@ -105,7 +116,7 @@ function component(width, height, color, x, y, type) {
   };
   this.newPos = function () {
     //this.gravitySpeed += this.gravity;
-    this.x += this.speedX;
+    this.x += this.speedX; //+ Math.floor(myScore / 1000) * 5;
     this.y += this.speedY; //+ this.gravitySpeed;
     this.hitBottom();
   };
@@ -116,6 +127,7 @@ function component(width, height, color, x, y, type) {
       // this.gravitySpeed = 0;
     }
   };
+
   this.crashWith = function (otherobj) {
     var myleft = this.x;
     var myright = this.x + this.width;
@@ -136,21 +148,6 @@ function component(width, height, color, x, y, type) {
     }
     return crash;
   };
-}
-function moveUp() {
-  myGamePiece.speedY = -1;
-}
-
-function moveDown() {
-  myGamePiece.speedY = +1;
-}
-
-function moveLeft() {
-  myGamePiece.speedX -= 1;
-}
-
-function moveRight() {
-  myGamePiece.speedX += 1;
 }
 
 function stopMove() {
