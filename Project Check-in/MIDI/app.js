@@ -10,12 +10,19 @@ const mtof = function (midiNum) {
 var myGamePiece;
 var myObstacles = [];
 var myScore;
+var myNotes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
 
 function startGame() {
-  myGamePiece = new component(30, 30, "purple", 10, 120);
+  myGamePiece = new component(30, 30, "purple", 10, 300);
   myGamePiece.gravity = 0.5;
   myScore = new component("30px", "Consolas", "orange", 777, 40, "text");
+  myNotes = new component("30px", "Consolas", "white");
   myGameArea.start();
+}
+
+function randomNote() {
+  let randomIndex = Math.floor(Math.random() * myNotes.length);
+  return myNotes[randomIndex];
 }
 
 var myGameArea = {
@@ -50,11 +57,17 @@ function updateGameArea() {
       Math.random() * (maxHeight - minHeight + 1) + minHeight
     );
     minGap = 50;
-    maxGap = 200;
+    maxGap = 400;
     gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-    myObstacles.push(new component(10, height, "green", x, 0));
     myObstacles.push(
-      new component(10, x - height - gap, "green", x, height + gap)
+      new component(
+        30,
+        1400,
+        "green",
+        x,
+        0,
+        (myNotes[randomNote()], 30, 50, "white")
+      )
     );
   }
   for (let i = 0; i < myObstacles.length; i += 1) {
@@ -65,13 +78,15 @@ function updateGameArea() {
   myScore.update();
   myGamePiece.newPos();
   myGamePiece.update();
+  myNotes.text = myNotes;
+  myNotes.update();
 }
 function component(width, height, color, x, y, type) {
   this.type = type;
   this.score = 0;
   this.width = width;
   this.height = height;
-  this.speedX = 0;
+  this.speedX = 1;
   this.speedY = 0;
   this.x = x;
   this.y = y;
