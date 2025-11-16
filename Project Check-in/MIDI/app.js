@@ -11,9 +11,11 @@ var myGamePiece;
 var myObstacles = [];
 var myScore;
 var myNotes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
+//make this array connect to midi note values
+//if midi.onNoteon = note in obstacle, continue, else stop game
 
 function startGame() {
-  myGamePiece = new component(30, 30, "purple", 10, 300);
+  myGamePiece = new component(30, 30, "purple", 150, 300);
   myGamePiece.gravity = 0.5;
   myScore = new component("30px", "Consolas", "orange", 777, 40, "text");
   myNotes = new component("30px", "Consolas", "white");
@@ -44,30 +46,33 @@ var myGameArea = {
 
 function updateGameArea() {
   var x, height, gap, minHeight, maxHeight, minGap, maxGap;
-  for (let i = 0; i < myObstacles.length; i += 1) {
-    if (myGamePiece.crashWith(myObstacles[i])) {
-      return;
-    }
-  }
+  // for (let i = 0; i < myObstacles.length; i += 1) {}
+
   myGameArea.clear();
   myGameArea.frameNo += 1;
   if (myGameArea.frameNo == 1 || everyinterval(randomIndex())) {
     x = myGameArea.canvas.width;
-    minHeight = 20;
-    maxHeight = 200;
-    height = Math.floor(
-      Math.random() * (maxHeight - minHeight + 1) + minHeight
+    var velocity = 5;
+    const minWidth = 50;
+    const maxWidth = 300;
+    const randomWidth = Math.floor(
+      Math.random() * (maxWidth - minWidth + 1) + minWidth
     );
-    minGap = 250;
-    maxGap = 400;
+
+    const minGap = myObstacles.width + "10px";
+    const maxGap = 400;
     gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-    myObstacles.push(new component(50, 1400, "green", x, 0));
+    myObstacles.push(new component(randomWidth + 10, 1400, "red", x, 0, gap));
+    myObstacles.push(new component(randomWidth, 1400, "green", x, 0, gap));
     myObstacles.push(
-      new component("30px", "Consolas", "orange", x + 5, 250, "text")
+      new component(randomWidth, "Consolas", "orange", x + 20, 250, "text", gap)
     );
   }
   for (let i = 0; i < myObstacles.length; i += 1) {
-    myObstacles[i].x += -1;
+    //HOW TO MAKE THIS GRANDUALLY GET FASTER?????
+    myObstacles[i].x += -1; //velocity
+
+    // velocity *= 1.05;
     myObstacles[i].update();
   }
   myScore.text = "SCORE: " + myGameArea.frameNo;
@@ -82,7 +87,7 @@ function component(width, height, color, x, y, type) {
   this.score = 0;
   this.width = width;
   this.height = height;
-  this.speedX = 1;
+  this.speedX = 0;
   this.speedY = 0;
   this.x = x;
   this.y = y;
@@ -116,7 +121,7 @@ function component(width, height, color, x, y, type) {
   };
   this.newPos = function () {
     //this.gravitySpeed += this.gravity;
-    this.x += this.speedX; //+ Math.floor(myScore / 1000) * 5;
+    this.x += this.speedX;
     this.y += this.speedY; //+ this.gravitySpeed;
     this.hitBottom();
   };
@@ -129,11 +134,11 @@ function component(width, height, color, x, y, type) {
   };
 
   this.crashWith = function (otherobj) {
-    var myleft = this.x;
+    //var myleft = this.x;
     var myright = this.x + this.width;
     var mytop = this.y;
     var mybottom = this.y + this.height;
-    var otherleft = otherobj.x;
+    // var otherleft = otherobj.x;
     var otherright = otherobj.x + otherobj.width;
     var othertop = otherobj.y;
     var otherbottom = otherobj.y + otherobj.height;
@@ -162,13 +167,18 @@ function everyinterval(n) {
   return false;
 }
 
-// function accelerate(n) {
-//  myGamePiece.gravity = n;
+//need own function to accelerate?
+// function accelerate() {
+//  myObstacles[i].x =
 // }
 
-function midiMoves(n) {
-  myGamePiece.y = n;
-}
+// if (myMidiNotes.onNoteOn[ch][pitch] touches "red" and != myObstacles.myNotes) {
+//     return stopMove();
+// else {
+// }
+//   }
+
+document.body.onload = startGame;
 
 //-----------------------------------------Create Web Audio Graph-----------------------------------------
 const myAudContext = new AudioContext();
@@ -177,6 +187,7 @@ const fader = new GainNode(myAudContext);
 fader.gain.value = 0.25;
 fader.connect(myAudContext.destination);
 myAudContext.resume();
+
 //make a storage array for notes
 
 //array with 16 elements 1 for each channel
@@ -199,36 +210,92 @@ const myMIDIstuff = new MIDIengine();
 myMIDIstuff.onNoteOn = (pitch, velocity, ch) => {
   myMidiNotes[ch][pitch] = new OscillatorNode(myAudContext);
   myMidiNotes[ch][pitch].frequency.value = mtof(pitch);
+  let now = myAudContext.currentTime;
+  fader.gain.linearRampToValueAtTime(1, now + 0.25);
   myMidiNotes[ch][pitch].connect(fader);
   myMidiNotes[ch][pitch].start();
   console.log("Note On:", pitch, velocity, ch);
 };
 
+// if (myMIDIstuff.onNoteOn != myObstacles.myNotes) {
+//   return stopMove();
+// }
+
 myMIDIstuff.onNoteOff = (pitch, velocity, ch) => {
   myMidiNotes[ch][pitch].frequency.value = mtof(pitch);
+  // let now = myAudContext.currentTime;
+  // fader.gain.linearRampToValueAtTime(0, now + 2);
   myMidiNotes[ch][pitch].connect(fader);
   myMidiNotes[ch][pitch].stop();
   console.log("Note Off:", pitch, velocity, ch);
 };
 
-document.body.onload = startGame;
+//-----------------------------------------Game Connection to MIDI-----------------------------------------
+// if myMidiNotes[ch][pitch] != null, move game piece to pitch
+// myMIDIstuff.onNoteOn = (pitch, velocity, ch) => {
+//   myMidiNotes[ch][pitch] = new OscillatorNode(myAudContext);
+//   myMidiNotes[ch][pitch].frequency.value = mtof(pitch);
+//   let now = myAudContext.currentTime;
+//   fader.gain.linearRampToValueAtTime(1, now + 0.25);
+//   myMidiNotes[ch][pitch].connect(fader);
+//   myMidiNotes[ch][pitch].start();
+//   console.log("Note On:", pitch, velocity, ch);
+//   midiMoves(600 - pitch * 5); //map midi pitch to y position
+// }
+
+//-----------------------------------------MIDI Sound-----------------------------------------
+
+// //Step 1 new audio context
+// const myAudio = new AudioContext();
+
+// //Step 2 gain node
+// const masterGain = new GainNode(myAudio);
+// masterGain.gain.value = 0.5;
+
+// //Step 3 connect gain node to destination
+// masterGain.connect(myAudio.destination);
+
+// //Step 4
+// const synthSound = function () {
+//   let osc = new OscillatorNode(myAudio);
+
+//   let adsr = new GainNode(myAudio);
+//   adsr.gain.value = 0;
+
+//   osc.connect(adsr);
+//   adsr.connect(masterGain);
+
+//   osc.frequency.value = mtof(pitch);
+
+//   osc.start();
+
+//   let now = myAudio.currentTime;
+
+//   adsr.gain.linearRampToValueAtTime(1, now + 0.25);
+//   adsr.gain.linearRampToValueAtTime(0, now + 3);
+// };
 
 //-----------------------------------------add event listeners-----------------------------------------
 
-let UpButton = document.querySelector("#UpButton");
-UpButton.onclick = moveUp;
-UpButton.onmouseup = stopMove;
+let ResumeButton = document.querySelector("#ResumeButton");
+ResumeButton.onclick = function () {
+  myAudio.resume().then(() => {
+    console.log("Playback resumed successfully");
+  });
+};
 
-let DownButton = document.querySelector("#DownButton");
-DownButton.onclick = moveDown;
-DownButton.onmouseup = stopMove;
+// let UpButton = document.querySelector("#UpButton");
+// UpButton.onclick = moveUp;
+// UpButton.onmouseup = stopMove;
 
-let LeftButton = document.querySelector("#LeftButton");
-LeftButton.onclick = moveLeft;
-LeftButton.onmouseup = stopMove;
+// let DownButton = document.querySelector("#DownButton");
+// DownButton.onclick = moveDown;
+// DownButton.onmouseup = stopMove;
 
-let RightButton = document.querySelector("#RightButton");
-RightButton.onclick = moveRight;
-RightButton.onmouseup = stopMove;
+// let LeftButton = document.querySelector("#LeftButton");
+// LeftButton.onclick = moveLeft;
+// LeftButton.onmouseup = stopMove;
 
-//-----------------------------------------connect MIDI to movement-----------------------------------------
+// let RightButton = document.querySelector("#RightButton");
+// RightButton.onclick = moveRight;
+// RightButton.onmouseup = stopMove;
