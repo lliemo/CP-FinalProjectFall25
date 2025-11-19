@@ -6,6 +6,32 @@ const mtof = function (midiNum) {
   return 440 * 2 ** ((midiNum - 69) / 12);
 };
 
+//  * This function ignores octave information and returns only the
+//  * pitch class by taking the MIDI number modulo 12.
+//  */
+const midiNum2NoteName = function (midiNum) {
+  // List of the 12 pitch classes in order.
+  // Index 0 corresponds to MIDI numbers that are multiples of 12 (C).
+  const pitchClasses = [
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+    "A",
+    "A#",
+    "B",
+  ];
+
+  // Use modulo 12 to wrap the MIDI number into the 0–11 range.
+  // Example: 60 % 12 → 0 → "C"
+  return pitchClasses[midiNum % 12];
+};
+
 //-----------------------------------------Game Code-----------------------------------------
 var myGamePiece;
 var myObstacles = [];
@@ -44,44 +70,6 @@ var myGameArea = {
   },
 };
 
-function updateGameArea() {
-  var x, height, gap, minHeight, maxHeight, minGap, maxGap;
-  // for (let i = 0; i < myObstacles.length; i += 1) {}
-
-  myGameArea.clear();
-  myGameArea.frameNo += 1;
-  if (myGameArea.frameNo == 1 || everyinterval(randomIndex())) {
-    x = myGameArea.canvas.width;
-    var velocity = 5;
-    const minWidth = 50;
-    const maxWidth = 300;
-    const randomWidth = Math.floor(
-      Math.random() * (maxWidth - minWidth + 1) + minWidth
-    );
-
-    const minGap = myObstacles.width + "10px";
-    const maxGap = 400;
-    gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-    myObstacles.push(new component(randomWidth + 10, 1400, "red", x, 0, gap));
-    myObstacles.push(new component(randomWidth, 1400, "green", x, 0, gap));
-    myObstacles.push(
-      new component(randomWidth, "Consolas", "orange", x + 20, 250, "text", gap)
-    );
-  }
-  for (let i = 0; i < myObstacles.length; i += 1) {
-    //HOW TO MAKE THIS GRANDUALLY GET FASTER?????
-    myObstacles[i].x += -1; //velocity
-
-    // velocity *= 1.05;
-    myObstacles[i].update();
-  }
-  myScore.text = "SCORE: " + myGameArea.frameNo;
-  myScore.update();
-  myGamePiece.newPos();
-  myGamePiece.update();
-  myNotes.text = myNotes;
-  myNotes.update();
-}
 function component(width, height, color, x, y, type) {
   this.type = type;
   this.score = 0;
@@ -118,6 +106,27 @@ function component(width, height, color, x, y, type) {
       ctx.fillStyle = color;
       ctx.fillRect(this.x, this.y, this.width, this.height);
     }
+
+    this.crashWith = function (otherobj) {
+      var myleft = this.x;
+      var myright = this.x + this.width;
+      var mytop = this.y;
+      var mybottom = this.y + this.height;
+      var otherleft = otherobj.x;
+      var otherright = otherobj.x + otherobj.width;
+      var othertop = otherobj.y;
+      var otherbottom = otherobj.y + otherobj.height;
+      var crash = true;
+      if (
+        mybottom < othertop ||
+        mytop > otherbottom ||
+        myright < otherleft ||
+        myleft > otherright
+      ) {
+        crash = false;
+      }
+      return crash;
+    };
   };
   this.newPos = function () {
     //this.gravitySpeed += this.gravity;
@@ -132,27 +141,54 @@ function component(width, height, color, x, y, type) {
       // this.gravitySpeed = 0;
     }
   };
+}
 
-  this.crashWith = function (otherobj) {
-    //var myleft = this.x;
-    var myright = this.x + this.width;
-    var mytop = this.y;
-    var mybottom = this.y + this.height;
-    // var otherleft = otherobj.x;
-    var otherright = otherobj.x + otherobj.width;
-    var othertop = otherobj.y;
-    var otherbottom = otherobj.y + otherobj.height;
-    var crash = true;
-    if (
-      mybottom < othertop ||
-      mytop > otherbottom ||
-      myright < otherleft ||
-      myleft > otherright
-    ) {
-      crash = false;
-    }
-    return crash;
-  };
+function updateGameArea() {
+  var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+  // for (let i = 0; i < myObstacles.length; i += 1) {}
+
+  myGameArea.clear();
+  myGameArea.frameNo += 1;
+  if (myGameArea.frameNo == 1 || everyinterval(randomIndex())) {
+    x = myGameArea.canvas.width;
+    var velocity = 5;
+    const minWidth = 50;
+    const maxWidth = 300;
+    const randomWidth = Math.floor(
+      Math.random() * (maxWidth - minWidth + 1) + minWidth
+    );
+
+    const minGap = myObstacles.width + "10px";
+    const maxGap = 400;
+    gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+    myObstacles.push(new component(randomWidth + 10, 1400, "red", x, 0, gap));
+    myObstacles.push(new component(randomWidth, 1400, "green", x, 0, gap));
+    myObstacles.push(
+      new component(randomWidth, "Consolas", "orange", x + 20, 250, "text", gap)
+    );
+  }
+  for (let i = 0; i < myObstacles.length; i += 1) {
+    //HOW TO MAKE THIS GRANDUALLY GET FASTER?????
+    myObstacles[i].x += -1; //velocity
+
+    // velocity *= 1.05;
+    myObstacles[i].update();
+  }
+  // if (myGamePiece.crashWith(myObstacles)) {
+  //   console.log("crash");
+  // } else {
+  //   console.log("no crash");
+  //   // myGameArea.clear();
+  //   // myObstacle.update();
+  //   // myGamePiece.newPos();
+  //   // myGamePiece.update();
+  // }
+  myScore.text = "SCORE: " + myGameArea.frameNo;
+  myScore.update();
+  myGamePiece.newPos();
+  myGamePiece.update();
+  myNotes.text = myNotes;
+  myNotes.update();
 }
 
 function stopMove() {
@@ -201,7 +237,7 @@ for (let i = 0; i < myMidiNotes.length; i++) {
 //myMidiNotes[channel][pitch]
 myMidiNotes[4][60];
 
-console.log(myMidiNotes[4][60]);
+console.log(myMidiNotes[4][60], midiNum2NoteName());
 
 //-----------------------------------------initialize our MIDI engine-----------------------------------------
 
@@ -214,12 +250,23 @@ myMIDIstuff.onNoteOn = (pitch, velocity, ch) => {
   fader.gain.linearRampToValueAtTime(1, now + 0.25);
   myMidiNotes[ch][pitch].connect(fader);
   myMidiNotes[ch][pitch].start();
-  console.log("Note On:", pitch, velocity, ch);
-};
+  console.log("Note On:", pitch, velocity, ch, midiNum2NoteName(pitch));
 
-// if (myMIDIstuff.onNoteOn != myObstacles.myNotes) {
-//   return stopMove();
-// }
+  if (myMIDIstuff.onNoteOn.pitch == midiNum2NoteName(60)) {
+    myReaction.text = "Nice!";
+  } else {
+    myReaction.text = "YUCK!";
+  }
+
+  if (
+    midiNum2NoteName(pitch) == myObstacles.myNotes &&
+    (myMIDIstuff.onNoteOn == true) == true
+  ) {
+    console.log("correct note played, continue game");
+  } else {
+    stopMove();
+  }
+};
 
 myMIDIstuff.onNoteOff = (pitch, velocity, ch) => {
   myMidiNotes[ch][pitch].frequency.value = mtof(pitch);
@@ -242,6 +289,13 @@ myMIDIstuff.onNoteOff = (pitch, velocity, ch) => {
 //   console.log("Note On:", pitch, velocity, ch);
 //   midiMoves(600 - pitch * 5); //map midi pitch to y position
 // }
+
+//FYI I MADE UP noteText and gamePieceInGreen, you need to replace with those values
+if (midiNum2NoteName(pitch) == myObstacles.text && myGamePiece == true) {
+  //then do stuff
+} else {
+  stopMove();
+}
 
 //-----------------------------------------MIDI Sound-----------------------------------------
 

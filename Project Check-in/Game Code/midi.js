@@ -30,10 +30,18 @@
  * If velocity is 0, the event is dispatched as Note Off instead.
  * @callback NoteOnHandler
  * @param {number} note - MIDI note number, 0–127.
+ *
  * @param {number} velocity - Attack velocity, 1–127.
  * @param {number} channel - MIDI channel, 0–15.
  * @returns {void}
  */
+
+/**
+ * Convert a MIDI note number into its pitch-class name.
+ * @callback NoteOnHandler
+ * @param {number} midiNum - The MIDI note number (0–127).
+ * @returns {string} The pitch-class (e.g., "C", "F#", "A#").
+ *
 
 /**
  * Called when Polyphonic Key Pressure (aftertouch per key) is received.
