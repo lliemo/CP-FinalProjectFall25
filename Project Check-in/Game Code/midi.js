@@ -33,6 +33,7 @@
  *
  * @param {number} velocity - Attack velocity, 1–127.
  * @param {number} channel - MIDI channel, 0–15.
+ * @param {number} gain - Gain value, 0.0–1.0.
  * @returns {void}
  */
 

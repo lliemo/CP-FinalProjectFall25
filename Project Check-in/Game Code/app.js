@@ -36,6 +36,8 @@ const midiNum2NoteName = function (midiNum) {
 var myGamePiece;
 var myObstacles = [];
 var myScore;
+var crashWith;
+var myReaction = ["・_・"];
 var myNotes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
 //make this array connect to midi note values
 //if midi.onNoteon = note in obstacle, continue, else stop game
@@ -44,7 +46,9 @@ function startGame() {
   myGamePiece = new component(30, 30, "purple", 150, 300);
   myGamePiece.gravity = 0.5;
   myScore = new component("30px", "Consolas", "orange", 777, 40, "text");
+  myReaction = new component("50px", "fantasy", "white", 500, 200, "text");
   myNotes = new component("30px", "Consolas", "white");
+  crashWith = false;
   myGameArea.start();
 }
 
@@ -85,6 +89,7 @@ class component {
     this.x = x;
     this.y = y;
     this.myObstacles = myObstacles;
+
     this.myNotes = [
       "A",
       "A#",
@@ -99,6 +104,7 @@ class component {
       "G",
       "G#",
     ];
+    this.myReaction = myReaction;
     this.text = this.myNotes[Math.floor(Math.random() * this.myNotes.length)];
     //this.gravity = 0;
     //this.gravitySpeed = 0;
@@ -114,74 +120,96 @@ class component {
       ctx.fillRect(this.x, this.y, this.width, this.height);
     }
   };
-
-  // crashWith = (otherobj) => {
-  //   var otherobj = otherobj;
-  //   var x = this.x;
-  //   var myleft = this.x;
-  //   var myright = this.x + this.width;
-  //   var mytop = this.y;
-  //   var mybottom = this.y + this.height;
-  //   var otherleft = otherobj.x;
-  //   var otherright = otherobj.x + otherobj.width;
-  //   var othertop = otherobj.y;
-  //   var otherbottom = otherobj.y + otherobj.height;
-  //   var crash = true;
-  //   if (
-  //     mybottom < othertop ||
-  //     mytop > otherbottom ||
-  //     myright < otherleft ||
-  //     myleft > otherright
-  //   ) {
-  //     crash = false;
-  //   }
-
-  //   return crash;
-  // };
-
-  crashWith = () => {
-    var myleft = this.x;
-    var myright = this.x + this.width;
-    var mytop = this.y;
-    var mybottom = this.y + this.height;
-    var otherleft = this.myObstacles.x;
-    var otherright = this.myObstacles.x + this.myObstacles.width;
-    var othertop = this.myObstacles.y;
-    var otherbottom = this.myObstacles.y + this.myObstacles.height;
-    var crash = true;
-    if (
-      myleft < otherright &&
-      myright > otherleft &&
-      mytop < otherbottom &&
-      mybottom > othertop
-    ) {
-      console.log("crash");
-      return crash;
-    }
-
-    crash = false;
-  };
-
   newPos = function () {
     //this.gravitySpeed += this.gravity;
     this.x += this.speedX;
     this.y += this.speedY; //+ this.gravitySpeed;
-    this.hitBottom();
+    //this.hitBottom();
   };
-  hitBottom = function () {
-    var rockbottom = myGameArea.canvas.height - this.height;
-    if (this.y > rockbottom) {
-      this.y = rockbottom;
-      // this.gravitySpeed = 0;
+
+  crashWith = function (otherobj) {
+    var otherobj = myObstacles;
+
+    var myleft = this.x;
+    var myright = this.x + this.width;
+    var mytop = this.y;
+    var mybottom = this.y + this.height;
+    var otherleft = otherobj.x;
+    var otherright = otherobj.x + otherobj.width;
+    var othertop = otherobj.y;
+    var otherbottom = otherobj.y + otherobj.height;
+    var crash = true;
+    if (
+      (mybottom < othertop) &
+      (mytop > otherbottom) &
+      (myright < otherleft) &
+      (myleft > otherright)
+      // (myleft < otherright) &
+      // (myright > otherleft) &
+      // (mytop < otherbottom) &
+      // (mybottom > othertop)
+    ) {
+      console.log("crash");
+      crash = true;
+      return crash;
+    } else {
+      crash = false;
+      console.log("no crash");
     }
   };
 }
 
-function updateGameArea() {
-  console.log(myGamePiece);
-  var x, height, gap, minHeight, maxHeight, minGap, maxGap;
-  // for (let i = 0; i < myObstacles.length; i += 1) {}
+//   crashWith = (otherobj) => {
+//     var otherobj = otherobj;
+//     var x = this.x;
+//     var myleft = this.x;
+//     var myright = this.x + this.width;
+//     var mytop = this.y;
+//     var mybottom = this.y + this.height;
+//     var otherleft = otherobj.x;
+//     var otherright = otherobj.x + otherobj.width;
+//     var othertop = otherobj.y;
+//     var otherbottom = otherobj.y + otherobj.height;
+//     var crash = true;
+//     if (
+//       mybottom < othertop ||
+//       mytop > otherbottom ||
+//       myright < otherleft ||
+//       myleft > otherright
+//     ) {
+//       crash = false;
+//     }
 
+//     return crash;
+//   };
+// }
+
+//HELP!!! THIS FUNCTION ISN'T WORKING ---------------------------
+
+// hitBottom = function () {
+//   var rockbottom = myGameArea.canvas.height - this.height;
+//   if (this.y > rockbottom) {
+//     this.y = rockbottom;
+//     // this.gravitySpeed = 0;
+//   }
+// };
+
+function updateGameArea() {
+  //console.log(myGamePiece);
+  var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+  for (let i = 0; i < myObstacles.length; i += 1) {
+    if (myGamePiece.crashWith(myObstacles[i])) {
+      myGameArea.stop();
+      console.log("crash");
+      return;
+      // } else {
+      //   // myGameArea.clear();
+      //   // myObstacles.update();
+      //   // myGamePiece.newPos();
+      //   // myGamePiece.update();
+      // }
+    }
+  }
   myGameArea.clear();
   myGameArea.frameNo += 1;
   if (myGameArea.frameNo == 1 || everyinterval(randomIndex())) {
@@ -203,21 +231,15 @@ function updateGameArea() {
     );
   }
   for (let i = 0; i < myObstacles.length; i += 1) {
-    //HOW TO MAKE THIS GRANDUALLY GET FASTER?????
     myObstacles[i].x += -1; //velocity
 
     // velocity *= 1.05;
     myObstacles[i].update();
+    //HELP!!! HOW TO MAKE THIS GRANDUALLY GET FASTER?????
   }
-  if (myGamePiece.crashWith()) {
-    console.log("crash");
-    // myGameArea.stop();
-    // } else {
-    //   myGameArea.clear();
-    //   myObstacle.update();
-    //   myGamePiece.newPos();
-    //   myGamePiece.update();
-  }
+  myGamePiece.newPos();
+  myGamePiece.update();
+
   //-------------------------------
   // if (myMIDIstuff.onNoteOn.pitch == midiNum2NoteName(myObstacles.text)) {
   //   console.log("correct note played, continue game");
@@ -228,12 +250,24 @@ function updateGameArea() {
   //   // myGamePiece.newPos();
   //   // myGamePiece.update();
   // }
+  // if (myMIDIstuff.onNoteOn) {
+  //   if ((myMIDIstuff.onNoteOn.pitch = midiNum2NoteName())) {
+  //     myReaction.text = "Nice!";
+  //   } else {
+  //     myReaction.text = "YUCK!";
+  //   }
+  // }
+
   myScore.text = "SCORE: " + myGameArea.frameNo;
   myScore.update();
   myGamePiece.newPos();
   myGamePiece.update();
+  myReaction.update();
+
   myNotes.text = myNotes;
   myNotes.update();
+  //myReaction.text = myReaction;
+  myReaction.update();
 }
 
 function stopMove() {
@@ -266,6 +300,7 @@ const myAudContext = new AudioContext();
 
 const fader = new GainNode(myAudContext);
 fader.gain.value = 0.25;
+//max.fader.gain.value = 1;
 fader.connect(myAudContext.destination);
 myAudContext.resume();
 
@@ -284,6 +319,19 @@ myMidiNotes[4][60];
 
 console.log(myMidiNotes[4][60], midiNum2NoteName());
 
+// function showMessage() {
+//     // Get the element
+//     const messageElement = document.getElementById('timedMessage');
+
+//     // 1. Make the text appear (e.g., using display or visibility)
+//     messageElement.style.display = 'block';
+
+//     // 2. Use setTimeout to hide the element after 3000 milliseconds (3 seconds)
+//     setTimeout(() => {
+//         messageElement.style.display = 'none';
+//     }, 3000); // 3000ms = 3 seconds
+// }
+
 //-----------------------------------------initialize our MIDI engine-----------------------------------------
 
 const myMIDIstuff = new MIDIengine();
@@ -292,34 +340,51 @@ myMIDIstuff.onNoteOn = (pitch, velocity, ch) => {
   myMidiNotes[ch][pitch] = new OscillatorNode(myAudContext);
   myMidiNotes[ch][pitch].frequency.value = mtof(pitch);
   let now = myAudContext.currentTime;
+  fader.gain.setValueAtTime = (0, now);
   fader.gain.linearRampToValueAtTime(1, now + 0.25);
+
   myMidiNotes[ch][pitch].connect(fader);
   myMidiNotes[ch][pitch].start();
   console.log("Note On:", pitch, velocity, ch, midiNum2NoteName(pitch));
 
-  if (myMIDIstuff.onNoteOn.pitch == midiNum2NoteName(60)) {
-    myReaction.text = "Nice!";
-  } else {
-    myReaction.text = "YUCK!";
-  }
+  // if (
+  //   midiNum2NoteName(pitch) == myObstacles.myNotes &&
+  //   (myMIDIstuff.onNoteOn == true) == true
+  // ) {
+  //   console.log("correct note played, continue game");
+  // } else {
+  //   stopMove();
+  // }
 
-  if (
-    midiNum2NoteName(pitch) == myObstacles.myNotes &&
-    (myMIDIstuff.onNoteOn == true) == true
-  ) {
-    console.log("correct note played, continue game");
-  } else {
-    stopMove();
+  if (myMidiNotes[ch][pitch] == midiNum2NoteName(myObstacles.text)) {
+    myReaction.text = "◡̈";
+    // if (myReaction.stop <= now + 2) {
+    //   myReaction.text = "・_・";
+    // }
+    myReaction.stop = now + 2;
   }
-};
+  if (myMidiNotes[ch][pitch] !== midiNum2NoteName(myObstacles.text)) {
+    myReaction.text = "˙◠˙";
+  } else {
+    myReaction.text == "・_・";
+  }
+  // HELP!!! I'm trying to have the reaction text be "・_・" initially, then change to "◡̈" for correct note and "˙◠˙" for incorrect note, then revert back to "・_・" after 2 seconds
 
-myMIDIstuff.onNoteOff = (pitch, velocity, ch) => {
-  myMidiNotes[ch][pitch].frequency.value = mtof(pitch);
-  // let now = myAudContext.currentTime;
-  // fader.gain.linearRampToValueAtTime(0, now + 2);
-  myMidiNotes[ch][pitch].connect(fader);
-  myMidiNotes[ch][pitch].stop();
-  console.log("Note Off:", pitch, velocity, ch);
+  myMIDIstuff.onNoteOff = (pitch, velocity, ch) => {
+    myMidiNotes[ch][pitch].frequency.value = mtof(pitch);
+    let releaseTimeConstant = 0.2;
+    let tinyGainValue = 0.0001;
+    let now = myAudContext.currentTime;
+    fader.gain.linearRampToValueAtTime(
+      tinyGainValue,
+      now + releaseTimeConstant
+    );
+
+    myMidiNotes[ch][pitch].connect(fader);
+    myMidiNotes[ch][pitch].stop();
+    //myMidiNotes[ch][pitch].stop(releaseTimeConstant, 1);
+    console.log("Note Off:", pitch, velocity, ch);
+  };
 };
 
 //-----------------------------------------Game Connection to MIDI-----------------------------------------
@@ -378,7 +443,7 @@ myMIDIstuff.onNoteOff = (pitch, velocity, ch) => {
 
 let ResumeButton = document.querySelector("#ResumeButton");
 ResumeButton.onclick = function () {
-  myAudio.resume().then(() => {
+  myAudContext.resume().then(() => {
     console.log("Playback resumed successfully");
   });
 };
