@@ -37,7 +37,7 @@ var myGamePiece;
 var myObstacles = [];
 var myScore;
 var crashWith;
-var myReaction = ["・_・"];
+var myReaction = []; //, "◡̈", "˙◠˙"];
 var myNotes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
 //make this array connect to midi note values
 //if midi.onNoteon = note in obstacle, continue, else stop game
@@ -48,7 +48,8 @@ function startGame() {
   myScore = new component("30px", "Consolas", "orange", 777, 40, "text");
   myReaction = new component("50px", "fantasy", "white", 500, 200, "text");
   myNotes = new component("30px", "Consolas", "white");
-  crashWith = false;
+  //crashWith = false;
+  crashWith = crashWith;
   myGameArea.start();
 }
 
@@ -89,7 +90,7 @@ class component {
     this.x = x;
     this.y = y;
     this.myObstacles = myObstacles;
-
+    this.myReaction = myReaction;
     this.myNotes = [
       "A",
       "A#",
@@ -104,7 +105,7 @@ class component {
       "G",
       "G#",
     ];
-    this.myReaction = myReaction;
+    // this.myReaction = myReaction;
     this.text = this.myNotes[Math.floor(Math.random() * this.myNotes.length)];
     //this.gravity = 0;
     //this.gravitySpeed = 0;
@@ -128,6 +129,7 @@ class component {
   };
 
   crashWith = function (otherobj) {
+    //HELP!!! THIS FUNCTION ISN'T WORKING ---------------------------
     var otherobj = myObstacles;
 
     var myleft = this.x;
@@ -139,21 +141,22 @@ class component {
     var othertop = otherobj.y;
     var otherbottom = otherobj.y + otherobj.height;
     var crash = true;
+    var crash = false;
     if (
-      (mybottom < othertop) &
-      (mytop > otherbottom) &
-      (myright < otherleft) &
-      (myleft > otherright)
+      mybottom < othertop &&
+      mytop > otherbottom &&
+      myright < otherleft &&
+      myleft > otherright
       // (myleft < otherright) &
       // (myright > otherleft) &
       // (mytop < otherbottom) &
       // (mybottom > othertop)
     ) {
+      this.crash = true;
       console.log("crash");
-      crash = true;
       return crash;
     } else {
-      crash = false;
+      this.crash = false;
       console.log("no crash");
     }
   };
@@ -183,8 +186,6 @@ class component {
 //     return crash;
 //   };
 // }
-
-//HELP!!! THIS FUNCTION ISN'T WORKING ---------------------------
 
 // hitBottom = function () {
 //   var rockbottom = myGameArea.canvas.height - this.height;
@@ -237,6 +238,7 @@ function updateGameArea() {
     myObstacles[i].update();
     //HELP!!! HOW TO MAKE THIS GRANDUALLY GET FASTER?????
   }
+
   myGamePiece.newPos();
   myGamePiece.update();
 
@@ -257,17 +259,15 @@ function updateGameArea() {
   //     myReaction.text = "YUCK!";
   //   }
   // }
-
+  myReaction.text = "・_・";
+  myReaction.update();
   myScore.text = "SCORE: " + myGameArea.frameNo;
   myScore.update();
   myGamePiece.newPos();
   myGamePiece.update();
-  myReaction.update();
 
   myNotes.text = myNotes;
   myNotes.update();
-  //myReaction.text = myReaction;
-  myReaction.update();
 }
 
 function stopMove() {
@@ -347,44 +347,65 @@ myMIDIstuff.onNoteOn = (pitch, velocity, ch) => {
   myMidiNotes[ch][pitch].start();
   console.log("Note On:", pitch, velocity, ch, midiNum2NoteName(pitch));
 
-  // if (
-  //   midiNum2NoteName(pitch) == myObstacles.myNotes &&
-  //   (myMIDIstuff.onNoteOn == true) == true
-  // ) {
-  //   console.log("correct note played, continue game");
-  // } else {
-  //   stopMove();
-  // }
-
   if (myMidiNotes[ch][pitch] == midiNum2NoteName(myObstacles.text)) {
-    myReaction.text = "◡̈";
-    // if (myReaction.stop <= now + 2) {
-    //   myReaction.text = "・_・";
-    // }
-    myReaction.stop = now + 2;
+    for (let i = 0; i < myReaction.length; i++) {
+      myReaction.push(
+        new component("50px", "fantasy", "white", 500, 200, "text")
+      );
+      myReaction.text = "◡̈";
+      // if (myReaction.stop <= now + 2) {
+      //   myReaction.text = "・_・";
+      // }
+      //myReaction.stop = now + 2;
+      (setTimeout = function () {
+        myReaction.text = "・_・";
+      }),
+        2000;
+    }
   }
   if (myMidiNotes[ch][pitch] !== midiNum2NoteName(myObstacles.text)) {
-    myReaction.text = "˙◠˙";
+    for (let i = 0; i < myReaction.length; i++) {
+      myReaction.push(
+        new component("50px", "fantasy", "white", 500, 200, "text")
+      );
+      myReaction.text = "˙◠˙";
+      (setTimeout = function () {
+        myReaction.text = "・_・";
+      }),
+        2000;
+    }
   } else {
+    // for (let i = 0; i < myReaction.length; i++) {
+    //   myReaction.push(
+    //     new component("50px", "fantasy", "white", 500, 200, "text")
+    //   );
     myReaction.text == "・_・";
+    //}
   }
+  myReaction.update();
   // HELP!!! I'm trying to have the reaction text be "・_・" initially, then change to "◡̈" for correct note and "˙◠˙" for incorrect note, then revert back to "・_・" after 2 seconds
+};
 
-  myMIDIstuff.onNoteOff = (pitch, velocity, ch) => {
-    myMidiNotes[ch][pitch].frequency.value = mtof(pitch);
-    let releaseTimeConstant = 0.2;
-    let tinyGainValue = 0.0001;
-    let now = myAudContext.currentTime;
-    fader.gain.linearRampToValueAtTime(
-      tinyGainValue,
-      now + releaseTimeConstant
-    );
+// if (
+//   midiNum2NoteName(pitch) == myObstacles.myNotes &&
+//   (myMIDIstuff.onNoteOn == true) == true
+// ) {
+//   console.log("correct note played, continue game");
+// } else {
+//   stopMove();
+// }
 
-    myMidiNotes[ch][pitch].connect(fader);
-    myMidiNotes[ch][pitch].stop();
-    //myMidiNotes[ch][pitch].stop(releaseTimeConstant, 1);
-    console.log("Note Off:", pitch, velocity, ch);
-  };
+myMIDIstuff.onNoteOff = (pitch, velocity, ch) => {
+  myMidiNotes[ch][pitch].frequency.value = mtof(pitch);
+  let releaseTimeConstant = 0.2;
+  let tinyGainValue = 0.0001;
+  let now = myAudContext.currentTime;
+  fader.gain.linearRampToValueAtTime(tinyGainValue, now + releaseTimeConstant);
+
+  myMidiNotes[ch][pitch].connect(fader);
+  myMidiNotes[ch][pitch].stop();
+  //myMidiNotes[ch][pitch].stop(releaseTimeConstant, 1);
+  console.log("Note Off:", pitch, velocity, ch);
 };
 
 //-----------------------------------------Game Connection to MIDI-----------------------------------------
